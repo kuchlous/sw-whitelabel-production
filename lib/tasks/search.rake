@@ -29,3 +29,11 @@ namespace :users do
     puts 'Reindexed users'
   end
 end
+
+namespace :lists do
+  desc "Reindex Users"
+  task :reindex => :environment do
+    List.reindex
+    puts 'Reindexed users'
+  end
+end

@@ -50,11 +50,12 @@ if !options_hash.has_key?(:token) || !options_hash.has_key?(:feedUrl) || !option
   exit
 end
 
-if !options_hash.has_key?(:storyUuids) || !options_hash.has_key?(:languageName) || !options_hash.has_key?(:readLevel) || !options_hash.has_key?(:publisherNames)
+if !(options_hash.has_key?(:storyUuids) || options_hash.has_key?(:languageName) || options_hash.has_key?(:readLevel) || options_hash.has_key?(:publisherNames))
   puts "atleast 1 of the following flags is required: storyUuids/languageName/readLevel/publisherNames"
   exit
 end
 
+user_input_hash = options_hash
 ########################################################
 
 
@@ -73,17 +74,15 @@ require 'json'
 # Error handling
 
 # Assumption: Language, Author, Copy Right Holder, StoryCategory, Illustration already exist with passed IDs
-def createCompleteStory(api_response)
-  lang_obj = getLanguage(api_response[:language_uuid])
-
+def createCompleteStory(api_response, token, origin)
+  lang_obj = getLanguage(api_response[:language_uuid], token, origin)
   story_category_objs = []
-  api_response[:story_category_uuids].each {|uuid| story_category_objs << getStoryCategory(uuid) }
+  api_response[:story_category_uuids].each {|uuid| story_category_objs << getStoryCategory(uuid, token, origin) }
 
   author_objs = []
   api_response[:author_uuids].each do |uuid|
-    author_objs << getUser(uuid)
+    author_objs << getUser(uuid, token, origin)
   end
-
   story = Story.new(
     title:                api_response[:title], 
     attribution_text:     api_response[:attribution_text], 
@@ -107,7 +106,7 @@ def createCompleteStory(api_response)
   index = 0
   page_objs = []
   api_response[:pages].each do |page|
-    page_template = (page[:page_template_uuid] == nil) ? nil : getPageTemplate(page[:page_template_uuid])
+    page_template = (page[:page_template_uuid] == nil) ? nil : getPageTemplate(page[:page_template_uuid], token, origin)
     obj = Page.new(
       content:                page[:content], 
       position:               page[:position], 
@@ -116,7 +115,7 @@ def createCompleteStory(api_response)
       page_template:          page_template,
     )
     copied_page = obj.tap(&:save)
-    illustration_crop = (page[:illustration_crop_uuid] == nil) ? nil : getIllustrationCrop(page[:illustration_crop_uuid], copied_page)    
+    illustration_crop = (page[:illustration_crop_uuid] == nil) ? nil : getIllustrationCrop(page[:illustration_crop_uuid], copied_page, token, origin)    
 
     copied_page.illustration_crop = illustration_crop
     copied_page.save!
@@ -129,85 +128,85 @@ def createCompleteStory(api_response)
 end
 
 ################### FETCH FROM REMOTE SERVER #################
-def fetchPageTemplate(uuid)
+def fetchPageTemplate(uuid, token, origin)
   return {} if uuid.nil?
-  return fetchEntity("#{options_hash[:origin]}/api/v0/page_template/#{uuid}")
+  return fetchEntity("#{origin}/api/v0/page_template/#{uuid}?token=#{token}")
 end
 
-def fetchIllustrationCrop(uuid)
+def fetchIllustrationCrop(uuid, token, origin)
   return {} if uuid.nil?
-  return fetchEntity("#{options_hash[:origin]}/api/v0/illustration_crop/#{uuid}")
+  return fetchEntity("#{origin}/api/v0/illustration_crop/#{uuid}?token=#{token}")
 end
 
-def fetchIllustration(uuid)
+def fetchIllustration(uuid, token, origin)
   return {} if uuid.nil?
-  return fetchEntity("#{options_hash[:origin]}/api/v0/illustration/#{uuid}")
+  return fetchEntity("#{origin}/api/v0/illustration/#{uuid}?token=#{token}")
 end
 
-def fetchIllustrationStyle(uuid)
+def fetchIllustrationStyle(uuid, token, origin)
   return {} if uuid.nil?
-  return fetchEntity("#{options_hash[:origin]}/api/v0/illustration_style/#{uuid}")
+  return fetchEntity("#{origin}/api/v0/illustration_style/#{uuid}?token=#{token}")
 end
 
-def fetchIllustrationCategory(uuid)
+def fetchIllustrationCategory(uuid, token, origin)
   return {} if uuid.nil?
-  return fetchEntity("#{options_hash[:origin]}/api/v0/illustration_category/#{uuid}")
+  return fetchEntity("#{origin}/api/v0/illustration_category/#{uuid}?token=#{token}")
 end
 
-def fetchIllustrator(uuid)
+def fetchIllustrator(uuid, token, origin)
   return {} if uuid.nil?
-  return fetchEntity("#{options_hash[:origin]}/api/v0/illustrator/#{uuid}")
+  return fetchEntity("#{origin}/api/v0/illustrator/#{uuid}?token=#{token}")
 end
 
-def fetchLanguage(uuid)
+def fetchLanguage(uuid, token, origin)
   return {} if uuid.nil?
-  return fetchEntity("#{options_hash[:origin]}/api/v0/language/#{uuid}")
+  return fetchEntity("#{origin}/api/v0/language/#{uuid}?token=#{token}")
 end
 
-def fetchStoryCategory(uuid)
+def fetchStoryCategory(uuid, token, origin)
   return {} if uuid.nil?
-  return fetchEntity("#{options_hash[:origin]}/api/v0/story_category/#{uuid}")
+  return fetchEntity("#{origin}/api/v0/story_category/#{uuid}?token=#{token}")
 end
 
-def fetchUser(uuid)
+def fetchUser(uuid, token, origin)
   return {} if uuid.nil?
-  return fetchEntity("#{options_hash[:origin]}/api/v0/user/#{uuid}")
+  return fetchEntity("#{origin}/api/v0/user/#{uuid}?token=#{token}")
 end
 
-def fetchLanguageFont(uuid)
+def fetchLanguageFont(uuid, token, origin)
   return {} if uuid.nil?
-  return fetchEntity("#{options_hash[:origin]}/api/v0/language_font/#{uuid}")
+  return fetchEntity("#{origin}/api/v0/language_font/#{uuid}?token=#{token}")
 end
 
-def fetchStoryCategoryBanner(uuid)
+def fetchStoryCategoryBanner(uuid, token, origin)
   return {} if uuid.nil?
-  return fetchFile("#{options_hash[:origin]}/api/v0/story_category_banner/#{uuid}") 
+  return fetchFile("#{origin}/api/v0/story_category_banner/#{uuid}?token=#{token}") 
 end
 
-def fetchStoryCategoryHomeImage(uuid)
+def fetchStoryCategoryHomeImage(uuid, token, origin)
   return {} if uuid.nil?
-  return fetchFile("#{options_hash[:origin]}/api/v0/story_category_home_image/#{uuid}") 
+  return fetchFile("#{origin}/api/v0/story_category_home_image/#{uuid}?token=#{token}") 
 end
 
-def fetchIllustrationImg(uuid)
+def fetchIllustrationImg(uuid, token, origin)
   return {} if uuid.nil?
-  return fetchFile("#{options_hash[:origin]}/api/v0/illustration_image/#{uuid}") 
+  return fetchFile("#{origin}/api/v0/illustration_image/#{uuid}?token=#{token}") 
 end
 
-def fetchIllustrationCropImg(uuid)
+def fetchIllustrationCropImg(uuid, token, origin)
   return {} if uuid.nil?
-  return fetchFile("#{options_hash[:origin]}/api/v0/illustration_crop_image/#{uuid}") 
+  return fetchFile("#{origin}/api/v0/illustration_crop_image/#{uuid}?token=#{token}") 
 end
 
-def fetchStoryUuid(id)
-  api_response = RestClient.get "#{options_hash[:origin]}/api/v0/story_uuid/#{id}"
+def fetchStoryUuid(id, token, origin)
+  api_response = RestClient.get "#{origin}/api/v0/story_uuid/#{id}?token=#{token}"
   story_data = JSON.parse(api_response, :symbolize_names => true)
   return story_data[:uuid]
 end
 
-def fetchStory(uuid, token)
+def fetchStory(uuid, token, origin)
   puts "calling story download API..."
-  api_response = RestClient.get "#{options_hash[:origin]}/api/v0/story/#{uuid}?token=#{token}"
+  api_response = RestClient.get "#{origin}/api/v0/story/#{uuid}?token=#{token}"
   story_data = JSON.parse(api_response, :symbolize_names => true)
   return story_data
 end
@@ -224,11 +223,11 @@ end
 ########################################################
 
 ################## GET OBJECT METHODS ######################
-def getPageTemplate(uuid)
-  # page_template_obj = PageTemplate.find_by_uuid(uuid)
-  # if page_template_obj.nil?
+def getPageTemplate(uuid, token, origin)
+  page_template_obj = PageTemplate.find_by_uuid(uuid)
+  if page_template_obj.nil?
     puts "fetching page template with uuid => #{uuid}"                    
-    api_response = fetchPageTemplate(uuid)
+    api_response = fetchPageTemplate(uuid, token, origin)
     obj = PageTemplate.new(
       :name              => api_response[:name],
       :orientation       => api_response[:orientation],
@@ -242,17 +241,15 @@ def getPageTemplate(uuid)
       :uuid              => api_response[:uuid]
     )
     page_template_obj = obj.tap(&:save)
-  # end
-  # return page_template_obj
+  end
+  return page_template_obj
 end
 
-#getPageTemplate("SW-1")
-
-def getIllustrationStyle(uuid)
+def getIllustrationStyle(uuid, token, origin)
   i_style_obj = IllustrationStyle.find_by_uuid(uuid)
   if i_style_obj.nil?
     puts "fetching illustration style with uuid => #{uuid}"                
-    api_response = fetchIllustrationStyle(uuid)
+    api_response = fetchIllustrationStyle(uuid, token, origin)
     obj = IllustrationStyle.new(
       name: api_response[:name],
       uuid: api_response[:uuid]
@@ -262,13 +259,11 @@ def getIllustrationStyle(uuid)
   return i_style_obj
 end
 
-#getIllustrationStyle("SW-1")
-
-def getIllustrationCategory(uuid)
+def getIllustrationCategory(uuid, token, origin)
   i_category_obj = IllustrationCategory.find_by_uuid(uuid)
   if i_category_obj.nil?
     puts "fetching illustration category with uuid => #{uuid}"                
-    api_response = fetchIllustrationCategory(uuid)
+    api_response = fetchIllustrationCategory(uuid, token, origin)
     obj = IllustrationCategory.new(
       name: api_response[:name],
       uuid: api_response[:uuid]
@@ -278,33 +273,29 @@ def getIllustrationCategory(uuid)
   return i_category_obj
 end
 
-#getIllustrationCategory("SW-4")
-
-def getUser(uuid)
+def getUser(uuid, token, origin)
   user_obj = User.find_by_uuid(uuid)
   if user_obj.nil?
     puts "fetching user with uuid => #{uuid}"                
-    api_response = fetchUser(uuid)
+    api_response = fetchUser(uuid, token, origin)
     obj = User.new(
       :name     => api_response[:name],
       :email    => "#{SecureRandom.hex}@gmail.com",
       :password => "#{SecureRandom.hex}",      
       :uuid     => api_response[:uuid]      
     )
-    obj.save!
-    user_obj = User.find_by_uuid(api_response[:uuid])
-    return user_obj
+    user_obj = obj.tap(&:save)
   end
   return user_obj
 end
 
-def getIllustrator(uuid)
+def getIllustrator(uuid, token, origin)
   i_illustrator_obj = Person.find_by_id(uuid)
   if i_illustrator_obj.nil?
     puts "fetching illustrator with uuid => #{uuid}"                
-    api_response = fetchIllustrator(uuid)
+    api_response = fetchIllustrator(uuid, token, origin)
     puts api_response.inspect
-    user_obj = getUser(api_response[:user_uuid])
+    user_obj = getUser(api_response[:user_uuid], token, origin)
     obj = Person.new(
       user_id:    user_obj.id,
       first_name: api_response[:first_name], 
@@ -316,26 +307,23 @@ def getIllustrator(uuid)
   return i_illustrator_obj
 end
 
-#getIllustrator("SW-1")
-
-def getIllustration(uuid)
+def getIllustration(uuid, token, origin)
   illustration_obj = Illustration.find_by_uuid(uuid)
   if illustration_obj.nil?
     puts "fetching illustration with uuid => #{uuid}"                
-    api_response = fetchIllustration(uuid)
+    api_response = fetchIllustration(uuid, token, origin)
 
     i_style_objs = []
-    api_response[:style_uuids].each {|uuid| i_style_objs << getIllustrationStyle(uuid)}
+    api_response[:style_uuids].each {|uuid| i_style_objs << getIllustrationStyle(uuid, token, origin)}
 
     i_category_objs = []
-    api_response[:category_uuids].each {|uuid| i_category_objs << getIllustrationCategory(uuid)}
+    api_response[:category_uuids].each {|uuid| i_category_objs << getIllustrationCategory(uuid, token, origin)}
 
     i_illustrator_objs = []
-    api_response[:illustrator_uuids].each {|uuid| i_illustrator_objs << getIllustrator(uuid)}
+    api_response[:illustrator_uuids].each {|uuid| i_illustrator_objs << getIllustrator(uuid, token, origin)}
 
-    #byebug
     puts api_response.inspect
-    uploader_obj = getUser(api_response[:uploader_uuid])
+    uploader_obj = getUser(api_response[:uploader_uuid], token, origin)
 
     obj = Illustration.new(
       :name                     => api_response[:name],
@@ -364,7 +352,7 @@ def getIllustration(uuid)
       :uuid                     => api_response[:uuid]
     )
     if api_response[:image_path] != nil
-      file_data = fetchIllustrationImg(uuid)
+      file_data = fetchIllustrationImg(uuid, token, origin)
       puts file_data.class
       File.open('tmp.jpg', 'wb') {|f| f.write(file_data)}
       obj.image = File.open('tmp.jpg')
@@ -377,15 +365,12 @@ def getIllustration(uuid)
   return illustration_obj
 end
 
-#getIllustration("SW-1")
-
-def getIllustrationCrop(uuid, page)
+def getIllustrationCrop(uuid, page, token, origin)
   illustration_crop_obj = IllustrationCrop.find_by_uuid(uuid)
   if illustration_crop_obj.nil?
     puts "fetching illustration crop with uuid => #{uuid}"            
-    api_response = fetchIllustrationCrop(uuid)
-    illustration_obj = getIllustration(api_response[:illustration_uuid])
-    #byebug
+    api_response = fetchIllustrationCrop(uuid, token, origin)
+    illustration_obj = getIllustration(api_response[:illustration_uuid], token, origin)
     obj = IllustrationCrop.new(
       illustration_id:    illustration_obj.id,
       crop_details:       api_response[:crop_details],
@@ -397,7 +382,7 @@ def getIllustrationCrop(uuid, page)
     obj.pages = []
     obj.pages << page
     if api_response[:image_path] != nil
-      file_data = fetchIllustrationCropImg(uuid)
+      file_data = fetchIllustrationCropImg(uuid, token, origin)
       puts file_data.class      
       File.open('tmp.jpg', 'wb') {|f| f.write(file_data)}
       obj.image = File.open('tmp.jpg')
@@ -409,13 +394,11 @@ def getIllustrationCrop(uuid, page)
   return illustration_crop_obj
 end
 
-#getIllustrationCrop("SW-1")
-
-def getLanguageFont(uuid)
+def getLanguageFont(uuid, token, origin)
   lang_font_obj = LanguageFont.find_by_uuid(uuid)
   if lang_font_obj.nil?
     puts "fetching language font with uuid => #{uuid}"                
-    api_response = fetchLanguageFont(uuid)
+    api_response = fetchLanguageFont(uuid, token, origin)
     obj = LanguageFont.new(
       :font   => api_response[:font], 
       :script => api_response[:script],
@@ -426,15 +409,11 @@ def getLanguageFont(uuid)
   return lang_font_obj
 end
 
-#getLanguageFont("SW-1")
-
-#getIllustrator("SW-1")
-
-def getLanguageFont(uuid)
+def getLanguageFont(uuid, token, origin)
   lang_font_obj = LanguageFont.find_by_uuid(uuid)
   if lang_font_obj.nil?
     puts "fetching language font with uuid => #{uuid}"                
-    api_response = fetchLanguageFont(uuid)
+    api_response = fetchLanguageFont(uuid, token, origin)
     obj = LanguageFont.new(
       :font   => api_response[:font], 
       :script => api_response[:script],
@@ -445,14 +424,12 @@ def getLanguageFont(uuid)
   return lang_font_obj
 end
 
-#getLanguageFont("SW-1")
-
-def getLanguage(uuid)
+def getLanguage(uuid, token, origin)
   lang_obj = Language.find_by_uuid(uuid)
   if lang_obj.nil?
     puts "fetching language with uuid => #{uuid}"                
-    api_response = fetchLanguage(uuid)
-    lang_font_obj = getLanguageFont(api_response[:language_font_uuid])
+    api_response = fetchLanguage(uuid, token, origin)
+    lang_font_obj = getLanguageFont(api_response[:language_font_uuid], token, origin)
     obj = Language.new(
       :is_right_to_left    => api_response[:is_right_to_left],
       :can_transliterate   => api_response[:can_transliterate],
@@ -470,13 +447,11 @@ def getLanguage(uuid)
   return lang_obj
 end
 
-#getLanguage("SW-1")
-
-def getStoryCategory(uuid)
+def getStoryCategory(uuid, token, origin)
   story_category_obj = StoryCategory.find_by_uuid(uuid)
   if story_category_obj.nil?
     puts "fetching story category with uuid => #{uuid}"                
-    api_response = fetchStoryCategory(uuid)
+    api_response = fetchStoryCategory(uuid, token, origin)
     obj = StoryCategory.new(
       :name           => api_response[:name],
       :private        => api_response[:private],
@@ -484,14 +459,14 @@ def getStoryCategory(uuid)
       :uuid           => api_response[:uuid]
     )
     if api_response[:banner_path] != nil
-      file_data = fetchStoryCategoryBanner(uuid)
+      file_data = fetchStoryCategoryBanner(uuid, token, origin)
       puts file_data.class      
       File.open('tmp.jpg', 'wb') {|f| f.write(file_data)}
       obj.category_banner = File.open('tmp.jpg')
     end
 
     if api_response[:home_image_path] != nil
-      file_data = fetchStoryCategoryHomeImage(uuid)
+      file_data = fetchStoryCategoryHomeImage(uuid, token, origin)
       puts file_data.class      
       File.open('tmp.jpg', 'wb') {|f| f.write(file_data)}
       obj.category_home_image = File.open('tmp.jpg')
@@ -502,18 +477,25 @@ def getStoryCategory(uuid)
   return story_category_obj
 end
 
-#getStoryCategory("SW-21")
 # ############################ Parse OPDS Feed ##############################
 require "opds"
 story_uuids = []
-opds_obj = OPDS.access(options_hash[:feedUrl])
+
+puts "Feed URL is : #{user_input_hash[:feedUrl]}"
+
+opds_obj = OPDS.access(user_input_hash[:feedUrl])
+
+if !opds_obj
+  puts "unable to access OPDS catalog"
+  exit
+end
 
 # filter out story uuids from the feed based on user input
-if options_hash.has_key?(:storyUuids)
-  if options_hash[:storyUuids][0] == "*"
+if user_input_hash.has_key?(:storyUuids)
+  if user_input_hash[:storyUuids][0] == "*"
     opds_obj.entries.each {|e| story_uuids << e.id}
   else
-    options_hash[:storyUuids].each do |story_uuid|
+    user_input_hash[:storyUuids].each do |story_uuid|
       opds_obj.entries.each do |e|
         if story_uuid == e.id && !story_uuids.include?(story_uuid)
           story_uuids << story_uuid
@@ -522,21 +504,21 @@ if options_hash.has_key?(:storyUuids)
     end
   end
 else
-  filter_count = (options_hash & [:languageName, :readLevel, :publisherName]).size
+  filter_count = (user_input_hash & [:languageName, :readLevel, :publisherName]).size
   opds_obj.entries.each do |e|
     match = 0
-    if options_hash.has_key?(:languageName)
-      if options_hash[:languageName] == e.dcmetas["language"][0][0]
+    if user_input_hash.has_key?(:languageName)
+      if user_input_hash[:languageName] == e.dcmetas["language"][0][0]
         match += 1
       end
     end
-    if options_hash.has_key?(:publisherName)
-      if options_hash[:publisherName] == e.dcmetas["publisher"][0][0]
+    if user_input_hash.has_key?(:publisherName)
+      if user_input_hash[:publisherName] == e.dcmetas["publisher"][0][0]
         match += 1
       end
     end
-    if options_hash.has_key?(:readLevel)
-      if options_hash[:readLevel] == e.summary
+    if user_input_hash.has_key?(:readLevel)
+      if user_input_hash[:readLevel] == e.summary
         match += 1
       end
     end
@@ -553,18 +535,22 @@ end
 
 puts story_uuids
 
+origin = user_input_hash[:origin]
+
+token = user_input_hash[:token]
+
 story_uuids.each do |story_uuid|
   if Story.find_by_uuid(story_uuid) == nil
-    story_data = fetchStory(story_uuid, options_hash[:token])
-    story_obj = createCompleteStory(story_data)
+    story_data = fetchStory(story_uuid, token, origin)
+    story_obj = createCompleteStory(story_data, token, origin)
     # fetch current story's root story if it has ancestors, save it, link it
     if !story_data[:ancestry].nil?
       root_story_id = story_data[:ancestry].split("/").first
-      root_story_uuid = fetchStoryUuid(root_story_id)
+      root_story_uuid = fetchStoryUuid(root_story_id, token, origin)
       root_story_obj = Story.find_by_uuid(root_story_uuid)
       if root_story_obj == nil
-        root_story_data = fetchStory(root_story_uuid, options_hash[:token])
-        root_story_obj = createCompleteStory(root_story_data)
+        root_story_data = fetchStory(root_story_uuid, token, origin)
+        root_story_obj = createCompleteStory(root_story_data, token, origin)
       else
         puts "root story with UUID : #{root_story_uuid} already exists"
       end

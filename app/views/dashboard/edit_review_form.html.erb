@@ -1,0 +1,9 @@
+<div id="review_form">
+ <% if @story.derivation_type != nil %>
+ 	<%= render :partial => "stories/iframe_for_review_form" %>
+	<%= render :partial => "stories/translated_story_review_form" %>
+ <% else %>
+ 	<%= render :partial => "stories/iframe_for_review_form" %>
+	<%= render :partial => "stories/original_story_review_form" %>
+ <% end %>
+</div>

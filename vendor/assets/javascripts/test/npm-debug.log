@@ -1,0 +1,40 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/usr/bin/node', '/usr/bin/npm', 'install', '-g', 'grunt' ]
+2 info using npm@1.4.28
+3 info using node@v0.10.37
+4 verbose node symlink /usr/bin/node
+5 verbose cache add [ 'grunt', null ]
+6 verbose cache add name=undefined spec="grunt" args=["grunt",null]
+7 verbose parsed url { protocol: null,
+7 verbose parsed url   slashes: null,
+7 verbose parsed url   auth: null,
+7 verbose parsed url   host: null,
+7 verbose parsed url   port: null,
+7 verbose parsed url   hostname: null,
+7 verbose parsed url   hash: null,
+7 verbose parsed url   search: null,
+7 verbose parsed url   query: null,
+7 verbose parsed url   pathname: 'grunt',
+7 verbose parsed url   path: 'grunt',
+7 verbose parsed url   href: 'grunt' }
+8 silly lockFile 20ff3fd8-grunt grunt
+9 error Error: Attempt to unlock grunt, which hasn't been locked
+9 error     at unlock (/usr/lib/node_modules/npm/lib/utils/locker.js:44:11)
+9 error     at cb (/usr/lib/node_modules/npm/lib/cache/add-local.js:30:5)
+9 error     at /usr/lib/node_modules/npm/lib/cache/add-local.js:47:20
+9 error     at /usr/lib/node_modules/npm/lib/utils/locker.js:22:20
+9 error     at /usr/lib/node_modules/npm/node_modules/inflight/inflight.js:22:7
+9 error     at Array.forEach (native)
+9 error     at res (/usr/lib/node_modules/npm/node_modules/inflight/inflight.js:21:9)
+9 error     at f (/usr/lib/node_modules/npm/node_modules/once/once.js:16:25)
+9 error     at afterMkdir (/usr/lib/node_modules/npm/lib/cache/get-stat.js:53:14)
+9 error     at /usr/lib/node_modules/npm/node_modules/mkdirp/index.js:46:53
+10 error If you need help, you may report this *entire* log,
+10 error including the npm and node versions, at:
+10 error     <http://github.com/npm/npm/issues>
+11 error System Linux 4.4.0-78-generic
+12 error command "/usr/bin/node" "/usr/bin/npm" "install" "-g" "grunt"
+13 error cwd /scratch/repos/wysihtml/test
+14 error node -v v0.10.37
+15 error npm -v 1.4.28
+16 verbose exit [ 1, true ]

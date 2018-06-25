@@ -311,8 +311,6 @@ class StoriesController < ApplicationController
         send_file "#{Rails.root}/public/#{Settings.fog.directory}/stories/#{story.id}/pdfs/#{params[:high_resolution] ? "high" : "low"}/#{story.to_param}#{story_revision}.pdf", :filename=>"#{story.to_param}.pdf", :dispostion=>'inline'
       end
     end
-<<<<<<< HEAD
-=======
  end
 
   # /v0/stories/reset_story_download_count
@@ -336,7 +334,6 @@ class StoriesController < ApplicationController
   def bulk_download
     # lib/bulk_download.rb module
     bk_download params, current_user,request 
->>>>>>> 8aa53bdf2b53442c69476640b249cf7423a659bc
   end
 
   def make_story_static_files(story)

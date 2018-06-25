@@ -1,4 +1,4 @@
-unless Rails.env == 'test'
+unless Rails.env == 'test' || IllustrationCategory.count > 0
   ['People', 'Nature & Weather', 'Buildings', 'Animals & Birds', 'Objects', 'Food & Culture', 'Transport', 'Backdrop'].each {|ic|
     IllustrationCategory.create!(name: ic)
   }

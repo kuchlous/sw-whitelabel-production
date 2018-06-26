@@ -367,8 +367,8 @@ def getIllustration(uuid, token, origin)
       File.open('tmp.jpg', 'wb') {|f| f.write(file_data)}
       obj.image = File.open('tmp.jpg')
     end
-    #obj.save!
     illustration_obj = obj.tap(&:save)
+    illustration_obj.reindex
     puts "IO: #{illustration_obj.inspect}"
     return illustration_obj
   end

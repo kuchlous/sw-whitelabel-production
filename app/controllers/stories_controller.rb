@@ -1,5 +1,4 @@
 include ApplicationHelper
-include BulkDownload # including lib/bulk_download.rb module.
   
 require 'utils/utils'
 require 'fileutils'
@@ -330,11 +329,6 @@ class StoriesController < ApplicationController
    @format = params[:type]
    @high_resolution = params[:resolution]
  end
-
-  def bulk_download
-    # lib/bulk_download.rb module
-    bk_download params, current_user,request 
-  end
 
   def make_story_static_files(story)
     directory = fog_directory

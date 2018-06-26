@@ -419,21 +419,6 @@ def getLanguageFont(uuid, token, origin)
   return lang_font_obj
 end
 
-def getLanguageFont(uuid, token, origin)
-  lang_font_obj = LanguageFont.find_by_uuid(uuid)
-  if lang_font_obj.nil?
-    puts "fetching language font with uuid => #{uuid}"                
-    api_response = fetchLanguageFont(uuid, token, origin)
-    obj = LanguageFont.new(
-      :font   => api_response[:font], 
-      :script => api_response[:script],
-      :uuid   => api_response[:uuid]
-    )
-    lang_font_obj = obj.tap(&:save)
-  end
-  return lang_font_obj
-end
-
 def getLanguage(uuid, token, origin)
   lang_obj = Language.find_by_uuid(uuid)
   if lang_obj.nil?

@@ -50,11 +50,7 @@ class ProfileController < ApplicationController
 
   def stories
     @current_tab = 'stories'
-    @stories = if current_user.organization? 
-        Story.page(params[:page]).per(10).where(status: Story.statuses[:published],organization: current_user.organization )
-      else
-        current_user.stories.page(params[:page]).per(10).where(status: Story.statuses[:published])
-      end
+    @stories = current_user.stories.page(params[:page]).per(10).where(status: Story.statuses[:published])
     render "index"
   end
 
@@ -67,9 +63,7 @@ class ProfileController < ApplicationController
 
   def drafts
     @current_tab = 'drafts'
-    @drafts = if current_user.organization?
-                Story.page(params[:page]).per(10).where(status: Story.statuses[:uploaded],organization: current_user.organization, dummy_draft: false )
-              elsif current_user.role == "content_manager"
+    @drafts = if current_user.role == "content_manager"
                 Story.where(status: Story.statuses[:draft], dummy_draft: false)
                      .joins(:authors)
                      .where("authors_stories.user_id = ? or stories.organization_id IS NOT NULL",@current_user)   
@@ -103,123 +97,6 @@ class ProfileController < ApplicationController
         format.js { render :destroy_error }
       end
     end
-  end
-
-  def un_reviewed_stories
-    if current_user && current_user.languages.any?
-     @current_tab = 'un_reviewed_stories'
-     @current_user = current_user
-     @languages = @current_user.languages if @current_user.languages.present?
-     @stories = Story.joins(:authors).where("authors_stories.user_id !=?",@current_user)
-                     .joins("LEFT OUTER JOIN reviewer_comments ON stories.id = reviewer_comments.story_id")
-                     .where("reviewer_comments.story_id IS ?", nil)
-                     .where(:status => Story.statuses[:published], :language => @languages.collect(&:id),:organization_id => nil, :flaggings_count => nil)
-                     .reorder("published_at ASC").page(params[:page]).per(12)
-    else
-      flash[:error] = "You are not authorised to do this."
-      redirect_to root_path
-    end
-  end
-
-  def un_translated_stories
-    if current_user && current_user.is_translator?
-      @current_tab = 'un_translated_stories'
-      @current_user = current_user
-      @languages = @current_user.tlanguages if @current_user.tlanguages.present?
-      at_user = User.find_by first_name:"Auto-Translate"
-      @stories = Story.joins(:authors)
-                      .where(:is_autoTranslate => true, :status => Story.statuses[:draft],
-                             :started_translation_at => nil, :language => @languages.collect(&:id))
-                      .uniq.reorder("created_at DESC").page(params[:page]).per(12)
-    else
-      flash[:error] = "You are not authorised to do this."
-      redirect_to root_path
-    end
-  end
-
-  def reviewed_stories
-    if current_user && current_user.languages.any?
-       @current_tab = 'reviewed_stories'
-       @current_user = current_user
-       @languages = @current_user.languages if @current_user.languages.present?
-       @stories = Story.select('stories.*,reviewer_comments.created_at')
-                       .joins("INNER JOIN reviewer_comments ON stories.id = reviewer_comments.story_id")
-                       .where("reviewer_comments.user_id =?", current_user.id)
-                       .where(:status => Story.statuses[:published], :language => @languages.collect(&:id), :organization_id => nil, :flaggings_count => nil)
-                       .order("reviewer_comments.created_at DESC").uniq.page(params[:page]).per(12)
-       @languages_sort = ""
-     else
-       flash[:error] = "You are not authorised to do this."
-       redirect_to root_path
-    end
-  end
-
-  def get_reviewer_language_stories
-      @current_user = current_user
-      @languages = @current_user.languages if @current_user.languages.present?
-      conditions = {:status => Story.statuses[:published], :organization_id => nil, :flaggings_count => nil}
-      @language = Language.find_by_name(params[:language]) if params[:language] && params[:language] != ''
-      conditions[:language] = @language.present? ? @language.id : @languages.collect(&:id)
-      conditions[:reading_level] = params[:level] if params[:level] && params[:level] != ''
-      @story_type = params[:story_type] == "Original" ? nil : (params[:story_type] == "Translation" ? "translated" : "relevelled") if params[:story_type] && params[:story_type] != ''
-      conditions[:derivation_type] = @story_type if params[:story_type] && params[:story_type] != ''
-      @languages_sort = params[:language]
-    if params[:current_tab] == "un_reviewed_stories"
-      @current_tab = 'un_reviewed_stories'
-      @stories = Story.joins(:authors).where("authors_stories.user_id !=?",@current_user)
-                      .joins("LEFT OUTER JOIN reviewer_comments ON stories.id = reviewer_comments.story_id")
-                      .where("reviewer_comments.story_id IS ?", nil)
-                      .where(conditions).reorder("published_at ASC").page(params[:page]).per(12)
-    else
-      @current_tab = 'reviewed_stories'
-      @stories = Story.select('stories.*,reviewer_comments.created_at')
-                      .joins("INNER JOIN reviewer_comments ON stories.id = reviewer_comments.story_id")
-                      .where("reviewer_comments.user_id =?", current_user.id).where(conditions)
-                      .order("reviewer_comments.created_at DESC").uniq.page(params[:page]).per(12)
-    end  
-    @page = "language_stories"
-  end
-
-  def get_translator_language_stories
-    @current_user = current_user
-    @languages = @current_user.tlanguages if @current_user.tlanguages.present?
-    conditions = {:flaggings_count => nil}
-    @language = Language.find_by_name(params[:language]) if params[:language] && params[:language] != ''
-    conditions[:language] = @language.present? ? @language.id : @languages.collect(&:id)
-    conditions[:reading_level] = params[:level] if params[:level] && params[:level] != ''
-    @languages_sort = params[:language]
-    at_user = User.find_by first_name:"Auto-Translate"
-    if params[:current_tab] == "un_translated_stories"
-      @current_tab = 'un_translated_stories'
-      @stories = Story.joins(:authors)
-                      .where(:is_autoTranslate => true, :status => Story.statuses[:draft], :started_translation_at => nil)
-                      .where(conditions)
-                      .uniq.page(params[:page]).per(12)
-    else 
-      @current_tab = 'translated_stories'
-      @stories = Story.joins(:authors)
-                      .where("authors_stories.user_id = ?", current_user)
-                      .where(:status => Story.statuses[:published], :is_autoTranslate => true)
-                      .where(conditions)
-                      .uniq.page(params[:page]).per(12)
-    end  
-    @page = "language_stories"
-  end
-
-  def change_translator
-    s = Story.find(params[:story_id])
-    s.authors = [current_user]    
-    s.started_translation_at = Time.now.strftime("%Y-%m-%d %H:%M:%S")
-    s.save!
-    redirect_to story_editor_path(s)
-  end
-
-  def review_guidelines
-    @current_tab = 'review_guldelines'
-  end
-
-  def translate_guidelines
-    @current_tab = 'translate_guidelines'
   end
 
   def un_edited_stories
@@ -262,14 +139,6 @@ class ProfileController < ApplicationController
     end
   end
 
-  def user_organization_downloads
-    @current_tab = 'organization_downloads'
-    @organization = User.find(current_user.id).organization
-    @story_downloads =  @organization.users.where(:id => current_user.id).first
-                                           .story_downloads.where(:organization_user => true)
-                                           .reorder("created_at DESC").page(params[:page]).per(12)
-  end
-
   def deactivated_stories
     @current_tab = 'deactivated'
     @deactivated_stories = current_user.stories.page(params[:page]).per(10).where(status: Story.statuses[:de_activated])
@@ -284,14 +153,7 @@ class ProfileController < ApplicationController
 
   def edit_in_progress
     @current_tab = 'edit_in_progress'
-    @edit_in_progress_stories = if current_user.organization?
-                                  Story.where(status: Story.statuses[:edit_in_progress])
-                                    .joins(:authors)
-                                    .where("authors_stories.user_id = ? or stories.organization_id = ?", current_user, current_user.organization_id)
-                                    .page(params[:page]).per(10)
-                                else
-                                  current_user.stories.page(params[:page]).per(10).where(status: Story.statuses[:edit_in_progress])
-                                end
+    @edit_in_progress_stories = current_user.stories.page(params[:page]).per(10).where(status: Story.statuses[:edit_in_progress])
     render "index"
   end
 
@@ -301,44 +163,9 @@ class ProfileController < ApplicationController
     user.flag(illustration, params[:reason])
   end
 
-  def user_org_details
-    @current_tab = "organization_details"
-    @org = Organization.find_by_id(params[:org_id])
-    unless current_user.is_admin(@org)
-      flash[:error] = "You are not authorised to do this."
-      redirect_to root_path
-    end
-  end
- 
-  def org_logo
-    @current_tab = 'details'
-    @org = Organization.find_by_id(params[:org_id])
-    @org.update_attributes(:logo => params[:org][:logo])
-  end
-
   def profile_image
     @current_tab = 'details'
     current_user.update_attributes(:profile_image => params[:user][:profile_image])
-  end
-
-  def edit_org
-    @current_tab = 'details'
-    @org = Organization.find_by_id(params[:org_id])
-    @org.update_attributes(:organization_name => params[:organization][:organization_name],:country => params[:organization][:country],:email => params[:organization][:email], :website => params[:organization][:website],
-                            :description => params[:organization][:description],:facebook_url => params[:organization][:facebook_url],
-                            :rss_url => params[:organization][:rss_url], :twitter_url => params[:organization][:twitter_url],
-                            :youtube_url => params[:organization][:youtube_url], :number_of_classrooms => params[:organization][:number_of_classrooms],
-                            :children_impacted => params[:organization][:children_impacted]) || flash[:errors] = @org.errors.messages
-    flash[:errors]
-    redirect_to user_org_details_path(:org_id => @org.id)
-    flash[:notice] = "Your changes have been saved."
-  end
-
-  def get_pub_logo_path
-    organization_id = params[:organization_id]
-    organization = !organization_id.to_s.empty? ? Organization.find(organization_id) : ""
-    logo_path = (organization!="") ? (organization.logo.present? ? organization.logo.url(:original) : "") : "#{host_url}/assets/publisher_logos/community.jpg"
-    render json: {"logo_path" => logo_path}
   end
 
   private

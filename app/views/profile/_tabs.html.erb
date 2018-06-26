@@ -4,11 +4,6 @@
       <li class="<%= @current_tab == 'details' ? 'active' : '' %>" role="presentation">
         <%= link_to "<span>#{t "dashboard.my_details_title"}</span>".html_safe , profile_path %>
       </li>
-      <% if current_user.organization.present? && (current_user.organization_roles != nil && current_user.organization_roles.include?("admin"))  %>
-       <li  class="<%= @current_tab == 'organization_details' ? 'active' : '' %>">
-        <%= link_to "<span>My Org</span>".html_safe, user_org_details_path(:org_id => current_user.organization) %>
-      </li>
-      <% end %>
       <li class="<%= @current_tab == 'stories' ? 'active' : '' %>" role="presentation">
         <%= link_to "<span>#{t "dashboard.my_published_stories"}</span>".html_safe, profile_stories_path %>
       </li>
@@ -38,11 +33,6 @@
       <% if current_user.organization? || current_user.content_manager? %>
        <li role="presentation" class="<%= @current_tab == 'private_images' ? 'active' : '' %>">
         <%= link_to "<span>#{t "dashboard.private_images"}</span>".html_safe, private_images_path %>
-      </li>
-      <% end %>
-      <% if current_user.organization.present? %>
-       <li  class="<%= @current_tab == 'organization_downloads' ? 'active' : '' %>">
-        <%= link_to "<span>#{t "dashboard.organisational_downloads_title"}</span>".html_safe, user_organization_downloads_path %>
       </li>
       <% end %>
     </ul>

@@ -207,33 +207,6 @@ Rails.application.routes.draw do
     # recently published stories
     get 'dashboard/recently-published-stories', to: 'dashboard#recently_published', as: :recently_published_stories
 
-    # un-reviewed stories   #reviewed stories
-    get 'dashboard/un_reviewed_stories', to: 'dashboard#un_reviewed_stories', as: :un_reviewed_stroies
-    get 'dashboard/reviewed_stories', to: 'dashboard#reviewed_stories', as: :reviewed_stroies
-    get 'dashboard/get_language_stories', to: 'dashboard#get_language_stories', as: :get_language_stories
-    get 'dashboard/reviewer_analytics', to: 'dashboard#reviewer_analytics', as: :reviewer_analytics
-    get 'dashboard/reviewer_summary', to: 'dashboard#reviewer_summary', as: :reviewer_summary
-    get 'dashboard/:id/edit_review_form', to: 'dashboard#edit_review_form', as: :edit_review_form
-    post 'dashboard/:id/save_review_form', to: "dashboard#save_review_edit_form", as: :save_review_edit_form
-
-    #assign_reviewer for language
-    get 'dashboard/assign_reviewer', to: 'dashboard#assign_reviewer', as: :assign_reviewer
-    post 'dashboard/assign_language_reviewer', to: 'dashboard#assign_language_reviewer', as: :assign_language_reviewer
-    get 'dashboard/delete_language_reviewer_dialog', to: 'dashboard#delete_language_reviewer_dialog', as: :delete_language_reviewer_dialog
-    delete 'dashboard/delete_language_reviewer', to: 'dashboard#delete_language_reviewer', as: :delete_language_reviewer
-
-
-    #assign_translator for language
-    get 'dashboard/assign_translator', to: 'dashboard#assign_translator', as: :assign_translator
-    get 'dashboard/un_translated_stories', to: 'dashboard#un_translated_stories', as: :un_translated_stories
-    get 'dashboard/translation_drafts', to: 'dashboard#translation_drafts', as: :translation_drafts
-    get 'dashboard/translated_stories', to: 'dashboard#translated_stories', as: :translated_stories
-    get 'dashboard/translator_analytics', to: 'dashboard#translator_analytics', as: :translator_analytics
-    post 'dashboard/assign_language_translator', to: 'dashboard#assign_language_translator', as: :assign_language_translator
-    get 'dashboard/get_tlanguage_stories', to: 'dashboard#get_tlanguage_stories', as: :get_tlanguage_stories
-    get 'dashboard/delete_language_translator_dialog', to: 'dashboard#delete_language_translator_dialog', as: :delete_language_translator_dialog
-    delete 'dashboard/delete_language_translator', to: 'dashboard#delete_language_translator', as: :delete_language_translator
-
     #donors
     get '/dashboard/donors', to: 'dashboard#donors', as: :donors
     post '/dashboard/donors/create', to: 'dashboard#create_donor', as: :create_donor
@@ -439,7 +412,6 @@ Rails.application.routes.draw do
       devise_scope :user do
         patch '/auth/:provider/callback' => 'omniauth_callbacks#create'
       end
-      get '/bulk-download', to: 'search#bulk_download', as: :bulk_download
       get '/home', to: 'home#show', as: :home
       get '/home/banners', to: 'home#banners', as: :banners
       get '/home/recommendations', to: 'home#recommendations', as: :recommendations

@@ -51,10 +51,6 @@ class Api::V1::SearchController < Api::V1::ApplicationController
       end
     end
     
-    if params[:bulk_download].present? && params[:bulk_download] == "Not Downloaded"
-      common_params[:search].merge!(:bulk_download => params[:bulk_download])
-    end
-
     search_obj = Search::Books.new(common_params, current_user, false)
 
     if(params[:sort].present? && params[:sort] == "Editor's Picks")
@@ -294,19 +290,4 @@ class Api::V1::SearchController < Api::V1::ApplicationController
     resource_not_found  
   end
 
-  #/api/v1/bulk-download
-  include BulkDownload # including lib/bulk_download.rb module.
-  def bulk_download
-    story_ids = params[:ids] # find all stories of download
-    current_user.story_download_count = current_user.story_download_count + story_ids.count
-    current_user.save!
-    story_ids = story_ids.join(",") # convert to comma-separated list
-    new_params = { 
-      high_resolution: "false", #params[:high_resolution]
-      format: "pdf", #params[:d_format]
-      stories_to_download: story_ids
-    }
-    # bk_download is in lib/bulk_download.rb module.
-    bk_download new_params, current_user, request 
-  end
 end

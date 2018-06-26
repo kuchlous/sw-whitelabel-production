@@ -19,6 +19,21 @@ module Search
       @session = session
     end
 
+    def sanitize_search_results_for_api(result)
+      sanitized_response = {}
+      sanitized_response["title"] = result["title"]
+      sanitized_response["id"] = result["id"]
+      sanitized_response["count"] = result["count"]
+      sanitized_response["description"] = result["description"]
+      sanitized_response["slug"] = result["slug"]
+      sanitized_response["categories"] = result["categories"]
+      sanitized_response["books"] = result["books"]
+      sanitized_response["language"] = result["language"]
+      sanitized_response["level"] = result["reading_level"]
+      sanitized_response["canDelete"] = result["can_delete"]
+      sanitized_response
+    end
+
     def sanitize_search_results_for_api_search(result)
       sanitized_response = {}
       sanitized_response["title"] = result["title"]
@@ -77,6 +92,25 @@ module Search
       min_story_count = search_params[:min_story_count].nil? ? 0 : search_params[:min_story_count]
       filters[:count] = {gte: min_story_count}
       return filters
+    end
+
+    def search
+      filters = filters(search_params)
+      order_criteria = List.count > 0 ? search_params[:sort] || DEFAULT_CRITERIA : []
+      query = search_query(filters, order_criteria, offset = nil)
+      @results = query
+      {
+        query: search_params,
+        order: order_criteria,
+        search_results: @results.map { |result| sanitize_search_results_for_api(result) },
+        metadata:
+          {
+            hits:         @results.total_count,
+            perPage:     @results.per_page,
+            page:         @results.current_page,
+            totalPages:  @results.total_pages
+          }
+      }
     end
 
     def general_search

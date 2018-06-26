@@ -28,9 +28,17 @@ class PageTemplate < ActiveRecord::Base
   after_create :add_uuid_and_origin_url
 
   def add_uuid_and_origin_url
-    self.uuid = "#{Settings.org_info.prefix}-#{self.id}"
-    self.origin_url = Settings.org_info.url
-    self.save
+    if self.uuid == nil && self.origin_url == nil
+      self.uuid = "#{Settings.org_info.prefix}-#{self.id}"
+      self.origin_url = Settings.org_info.url
+      self.save!
+    elsif self.uuid == nil
+      self.uuid = "#{Settings.org_info.prefix}-#{self.id}"
+      self.save!
+    elsif self.origin_url == nil
+      self.origin_url = Settings.org_info.url
+      self.save!
+    end
   end
   
   def get_similar_templates

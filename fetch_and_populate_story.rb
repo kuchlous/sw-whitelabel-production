@@ -116,7 +116,7 @@ def createCompleteStory(api_response, token, origin)
   index = 0
   page_objs = []
   api_response[:pages].each do |page|
-    page_template = (page[:page_template_uuid] == nil) ? nil : getPageTemplate(page[:page_template_uuid], token, origin)
+    page_template = (page[:page_template_name] == nil) ? nil : getPageTemplate(page[:page_template_name], token, origin)
     obj = Page.new(
       content:                page[:content], 
       position:               page[:position], 
@@ -233,24 +233,11 @@ end
 ########################################################
 
 ################## GET OBJECT METHODS ######################
-def getPageTemplate(uuid, token, origin)
-  page_template_obj = PageTemplate.find_by_uuid(uuid)
+def getPageTemplate(name, token, origin)
+  page_template_obj = PageTemplate.find_by_name(name)
   if page_template_obj.nil?
-    puts "fetching page template with uuid => #{uuid}"                    
-    api_response = fetchPageTemplate(uuid, token, origin)
-    obj = PageTemplate.new(
-      :name              => api_response[:name],
-      :orientation       => api_response[:orientation],
-      :image_position    => api_response[:image_position],
-      :content_position  => api_response[:content_position],
-      :image_dimension   => api_response[:image_dimension],
-      :content_dimension => api_response[:content_dimension],
-      :type              => api_response[:type],
-      :default           => api_response[:default],
-      :origin_url        => api_response[:origin_url],
-      :uuid              => api_response[:uuid]
-    )
-    page_template_obj = obj.tap(&:save)
+    puts "ERROR: page template not present"
+    return nil
   end
   return page_template_obj
 end
@@ -404,32 +391,11 @@ def getIllustrationCrop(uuid, page, token, origin)
   return illustration_crop_obj
 end
 
-def getLanguageFont(uuid, token, origin)
-  lang_font_obj = LanguageFont.find_by_uuid(uuid)
+def getLanguageFont(script, token, origin)
+  lang_font_obj = LanguageFont.find_by_script(script)
   if lang_font_obj.nil?
-    puts "fetching language font with uuid => #{uuid}"                
-    api_response = fetchLanguageFont(uuid, token, origin)
-    obj = LanguageFont.new(
-      :font   => api_response[:font], 
-      :script => api_response[:script],
-      :uuid   => api_response[:uuid]
-    )
-    lang_font_obj = obj.tap(&:save)
-  end
-  return lang_font_obj
-end
-
-def getLanguageFont(uuid, token, origin)
-  lang_font_obj = LanguageFont.find_by_uuid(uuid)
-  if lang_font_obj.nil?
-    puts "fetching language font with uuid => #{uuid}"                
-    api_response = fetchLanguageFont(uuid, token, origin)
-    obj = LanguageFont.new(
-      :font   => api_response[:font], 
-      :script => api_response[:script],
-      :uuid   => api_response[:uuid]
-    )
-    lang_font_obj = obj.tap(&:save)
+    puts "ERROR: language font not present"
+    return nil
   end
   return lang_font_obj
 end
@@ -439,7 +405,7 @@ def getLanguage(uuid, token, origin)
   if lang_obj.nil?
     puts "fetching language with uuid => #{uuid}"                
     api_response = fetchLanguage(uuid, token, origin)
-    lang_font_obj = getLanguageFont(api_response[:language_font_uuid], token, origin)
+    lang_font_obj = getLanguageFont(api_response[:language_font_script], token, origin)
     obj = Language.new(
       :is_right_to_left    => api_response[:is_right_to_left],
       :can_transliterate   => api_response[:can_transliterate],

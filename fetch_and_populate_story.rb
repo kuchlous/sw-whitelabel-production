@@ -100,7 +100,17 @@ def createCompleteStory(api_response, token, origin)
     tag_list:             api_response[:tag_list],
     uuid:                 api_response[:uuid]
   )
-  story_obj = story.tap(&:save)
+
+  begin
+    story.save!
+  rescue => exception
+    puts "Exception occurred!!\n\n"
+    puts exception
+    return nil
+  end
+
+  story_obj = story
+
   puts "ID of story created => #{story_obj.id}"
 
   index = 0
@@ -543,6 +553,11 @@ story_uuids.each do |story_uuid|
   if Story.find_by_uuid(story_uuid) == nil
     story_data = fetchStory(story_uuid, token, origin)
     story_obj = createCompleteStory(story_data, token, origin)
+    if story_obj == nil
+      puts "\n\nunable to save story with uuid : #{story_uuid}"
+      next
+    end
+    story_obj.reindex
     # fetch current story's root story if it has ancestors, save it, link it
     if !story_data[:ancestry].nil?
       root_story_id = story_data[:ancestry].split("/").first
@@ -551,6 +566,11 @@ story_uuids.each do |story_uuid|
       if root_story_obj == nil
         root_story_data = fetchStory(root_story_uuid, token, origin)
         root_story_obj = createCompleteStory(root_story_data, token, origin)
+        if root_story_obj == nil
+          puts "\n\nunable to save root story with uuid : #{root_story_obj}"
+          next
+        end
+        root_story_obj.reindex
       else
         puts "root story with UUID : #{root_story_uuid} already exists"
       end
@@ -560,5 +580,4 @@ story_uuids.each do |story_uuid|
   else
     puts "story with UUID : #{story_uuid} already exists"
   end
-
 end

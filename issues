@@ -1,7 +1,5 @@
-- Add list download
 - Books upload using API
   - reindex after save
-- Data sharing
+  - Publisher creation
 - imageMagick fix and update Dockerfile in deploy
-- wkhtmltopdf update
 - Simplify the documentation and scripts to not pass settings at multiple places

@@ -7,23 +7,8 @@ unless Rails.env == 'test' || IllustrationCategory.count > 0
     IllustrationStyle.create!(name: is)
   }
 
-  {
-    'Assamese'  => 'bengali',
-    'Bengali'   => 'bengali',
-    'Gujarati'  => 'gujrati',
-    'Hindi'     => 'devanagri',
-    'Kannada'   => 'kannada',
-    'Malayalam' => 'malayalam',
-    'Marathi'   => 'devanagri',
-    'Nepali'    => 'devanagri',
-    'Odia'     => 'odia',
-    'Punjabi'   => 'punjabi',
-    'Sanskrit'  => 'devanagri',
-    'Tamil'     => 'tamil',
-    'Telugu'    => 'telugu',
-  }.each { |k,v| Language.create!(name: k, can_transliterate: true, script: v) }
-
-  Language.create!(name: 'English', can_transliterate: false, script: 'english')
+  lf = LanguageFont.create!(font: "Noto Sans", script: "english")
+  Language.create!(name: 'English', can_transliterate: false, script: 'english', language_font: lf)
 
   locale_mapping = {
     'Assamese'  =>  'as',

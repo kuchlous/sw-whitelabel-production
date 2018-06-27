@@ -322,7 +322,7 @@ def getUser(uuid, token, origin)
 end
 
 def getIllustrator(uuid, token, origin)
-  i_illustrator_obj = Person.find_by_id(uuid)
+  i_illustrator_obj = Person.find_by_uuid(uuid)
   if i_illustrator_obj.nil?
     puts "fetching illustrator with uuid => #{uuid}"                
     api_response = fetchIllustrator(uuid, token, origin)
@@ -332,7 +332,7 @@ def getIllustrator(uuid, token, origin)
       user_id:    user_obj.id,
       first_name: api_response[:first_name], 
       last_name:  api_response[:last_name],
-      uuid:       api_response[:uuid]        
+      uuid:       api_response[:uuid]
     )
     i_illustrator_obj = obj.tap(&:save)
   end

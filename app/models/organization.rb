@@ -59,6 +59,7 @@ class Organization < ActiveRecord::Base
   scope :original_story_publishers, -> { where(organization_type: "Publisher").joins(:stories).where('stories.status' => 1, 'stories.derivation_type' => nil).uniq.order(:organization_name) }
   scope :story_publishers, -> { where(organization_type: "Publisher").joins(:stories).where('stories.status' => 1).uniq.order(:organization_name) }
 
+  after_create :add_uuid_and_origin_url
 
 
 
@@ -105,5 +106,18 @@ class Organization < ActiveRecord::Base
     organization_type=="Publisher"
   end
 
+  def add_uuid_and_origin_url
+    if self.uuid == nil && self.origin_url == nil
+      self.uuid = "#{Settings.org_info.prefix}-#{self.id}"
+      self.origin_url = Settings.org_info.url
+      self.save!
+    elsif self.uuid == nil
+      self.uuid = "#{Settings.org_info.prefix}-#{self.id}"
+      self.save!
+    elsif self.origin_url == nil
+      self.origin_url = Settings.org_info.url
+      self.save!
+    end
+  end
   
 end

@@ -83,6 +83,9 @@ def createCompleteStory(api_response, token, origin)
   api_response[:author_uuids].each do |uuid|
     author_objs << getUser(uuid, token, origin)
   end
+
+  org_obj = getOrganization(api_response[:organization_uuid], token, origin)
+  
   story = Story.new(
     title:                api_response[:title], 
     attribution_text:     api_response[:attribution_text], 
@@ -98,6 +101,7 @@ def createCompleteStory(api_response, token, origin)
     more_info:            api_response[:more_info],
     published_at:         Time.now.strftime("%Y-%m-%d %H:%M:%S"),
     tag_list:             api_response[:tag_list],
+    organization:         org_obj,
     uuid:                 api_response[:uuid]
   )
 
@@ -188,6 +192,11 @@ def fetchLanguageFont(uuid, token, origin)
   return fetchEntity("#{origin}/api/v0/language_font/#{uuid}?token=#{token}")
 end
 
+def fetchOrganization(uuid, token, origin)
+  return {} if uuid.nil?
+  return fetchEntity("#{origin}/api/v0/organization/#{uuid}?token=#{token}")
+end
+
 def fetchStoryCategoryBanner(uuid, token, origin)
   return {} if uuid.nil?
   return fetchFile("#{origin}/api/v0/story_category_banner/#{uuid}?token=#{token}") 
@@ -240,6 +249,32 @@ def getPageTemplate(name, token, origin)
     return nil
   end
   return page_template_obj
+end
+
+def getOrganization(uuid, token, origin)
+  org_obj = Organization.find_by_uuid(uuid)
+  if org_obj.nil?
+    puts "fetching organization with uuid => #{uuid}"                
+    api_response = fetchOrganization(uuid, token, origin)
+    obj = Organization.new(
+      organization_name:    => api_response[:organization_name],
+      organization_type:    => api_response[:organization_type],
+      country:              => api_response[:country],
+      city:                 => api_response[:city],
+      number_of_classrooms: => api_response[:number_of_classrooms],
+      children_impacted:    => api_response[:children_impacted],
+      status:               => api_response[:status],
+      description:          => api_response[:description],
+      website:              => api_response[:website],
+      facebook_url:         => api_response[:facebook_url],
+      rss_url:              => api_response[:rss_url],
+      twitter_url:          => api_response[:twitter_url],
+      youtube_url:          => api_response[:youtube_url],
+      uuid:                 => api_response[:uuid]
+    )
+    org_obj = obj.tap(&:save)
+  end
+  return org_obj
 end
 
 def getIllustrationStyle(uuid, token, origin)
@@ -334,7 +369,6 @@ def getIllustration(uuid, token, origin)
       :cached_votes_total       => api_response[:cached_votes_total],         
       :reads                    => api_response[:reads],         
       :is_pulled_down           => api_response[:is_pulled_down],         
-      :publisher_id             => api_response[:publisher_id],
       :copy_right_holder_id     => api_response[:copy_right_holder_id],
       :image_mode               => api_response[:image_mode],         
       :storage_location         => nil,

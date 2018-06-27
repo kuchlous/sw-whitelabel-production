@@ -184,6 +184,21 @@ class Api::V1::ListsController < Api::V1::ApplicationController
     render json: {"ok"=>true, "data"=> results}
   end
 
+  include BulkDownload # including lib/bulk_download.rb module.
+  def download
+    story_ids = @list.stories.map(&:id) # find all stories of list
+    story_ids = story_ids.join(",") # convert to comma-separated list
+
+    new_params = {
+      high_resolution: params[:high_resolution],
+      format: params[:d_format],
+      stories_to_download: story_ids,
+      list_id: params[:id],
+      list_name: @list.title
+    }
+    # bk_download is in lib/bulk_download.rb module.
+    bk_download new_params, current_user,request
+  end
   private
   def set_list
     @list = List.find(params[:id])

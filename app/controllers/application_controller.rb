@@ -9,6 +9,12 @@ class ApplicationController < ActionController::Base
 
   private
 
+  def fog_directory
+    credentials =  YAML.load_file("#{Rails.root}/config/fog.yml")
+    connection = Fog::Storage.new(credentials.values.first.symbolize_keys!)
+    connection.directories.get(Settings.fog.directory)
+  end
+
   def set_locale
    I18n.locale = session[:locale] || I18n.default_locale
   end

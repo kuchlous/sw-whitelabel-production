@@ -197,6 +197,11 @@ def fetchOrganization(uuid, token, origin)
   return fetchEntity("#{origin}/api/v0/organization/#{uuid}?token=#{token}")
 end
 
+def fetchOrganizationLogo(uuid, token, origin)
+  return {} if uuid.nil?
+  return fetchFile("#{origin}/api/v0/organization_logo/#{uuid}?token=#{token}") 
+end
+
 def fetchStoryCategoryBanner(uuid, token, origin)
   return {} if uuid.nil?
   return fetchFile("#{origin}/api/v0/story_category_banner/#{uuid}?token=#{token}") 
@@ -272,6 +277,11 @@ def getOrganization(uuid, token, origin)
       youtube_url:          => api_response[:youtube_url],
       uuid:                 => api_response[:uuid]
     )
+    if api_response[:logo_path] != nil
+      file_data = fetchOrganizationLogo(uuid, token, origin)
+      File.open('tmp.jpg', 'wb') {|f| f.write(file_data)}
+      obj.logo = File.open('tmp.jpg')
+    end
     org_obj = obj.tap(&:save)
   end
   return org_obj

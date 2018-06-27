@@ -262,22 +262,23 @@ def getOrganization(uuid, token, origin)
     puts "fetching organization with uuid => #{uuid}"                
     api_response = fetchOrganization(uuid, token, origin)
     obj = Organization.new(
-      organization_name:    => api_response[:organization_name],
-      organization_type:    => api_response[:organization_type],
-      country:              => api_response[:country],
-      city:                 => api_response[:city],
-      number_of_classrooms: => api_response[:number_of_classrooms],
-      children_impacted:    => api_response[:children_impacted],
-      status:               => api_response[:status],
-      description:          => api_response[:description],
-      website:              => api_response[:website],
-      facebook_url:         => api_response[:facebook_url],
-      rss_url:              => api_response[:rss_url],
-      twitter_url:          => api_response[:twitter_url],
-      youtube_url:          => api_response[:youtube_url],
-      uuid:                 => api_response[:uuid]
+      organization_name:    api_response[:organization_name],
+      organization_type:    api_response[:organization_type],
+      country:              api_response[:country],
+      city:                 api_response[:city],
+      number_of_classrooms: api_response[:number_of_classrooms],
+      children_impacted:    api_response[:children_impacted],
+      status:               api_response[:status],
+      description:          api_response[:description],
+      website:              api_response[:website],
+      facebook_url:         api_response[:facebook_url],
+      rss_url:              api_response[:rss_url],
+      twitter_url:          api_response[:twitter_url],
+      youtube_url:          api_response[:youtube_url],
+      uuid:                 api_response[:uuid]
     )
     if api_response[:logo_path] != nil
+      puts "fetching organization logo.."
       file_data = fetchOrganizationLogo(uuid, token, origin)
       File.open('tmp.jpg', 'wb') {|f| f.write(file_data)}
       obj.logo = File.open('tmp.jpg')

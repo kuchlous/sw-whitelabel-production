@@ -1,8 +1,7 @@
-- Google signup not working
+- Add list download
 - Books upload using API
-  - templates not correct
   - reindex after save
-  - card image not rendered correctly, maybe the crop-coords are wrong.
 - Data sharing
 - imageMagick fix and update Dockerfile in deploy
 - wkhtmltopdf update
+- Simplify the documentation and scripts to not pass settings at multiple places

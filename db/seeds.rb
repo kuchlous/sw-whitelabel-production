@@ -1,14 +1,17 @@
 unless Rails.env == 'test' || IllustrationCategory.count > 0
   ['People', 'Nature & Weather', 'Buildings', 'Animals & Birds', 'Objects', 'Food & Culture', 'Transport', 'Backdrop'].each {|ic|
-    IllustrationCategory.create!(name: ic)
+    IllustrationCategory.create!(name: ic, translated_name: ic)
   }
 
   ['Watercolour', 'Digital art', 'Pencil sketches', 'Collage', 'Realistic', 'Cartoony', 'Black and white', 'Photographs', 'Folk art', 'Detailed'].each { |is|
-    IllustrationStyle.create!(name: is)
+    IllustrationStyle.create!(name: is, translated_name: is)
   }
 
   lf = LanguageFont.create!(font: "Noto Sans", script: "english")
-  Language.create!(name: 'English', can_transliterate: false, script: 'english', language_font: lf)
+  Language.create!(name: 'English', can_transliterate: false, script: 'english', language_font: lf, translated_name: 'English')
+
+  lf = LanguageFont.create!(font: "Noto Sans", script: "english")
+  Language.create!(name: 'German', can_transliterate: false, script: 'english', language_font: lf, translated_name: 'German')
 
   locale_mapping = {
     'Assamese'  =>  'as',
@@ -31,7 +34,7 @@ unless Rails.env == 'test' || IllustrationCategory.count > 0
   end
 
   ['Fiction', 'Non-fiction', 'Folktales & Myths', 'Fantasy', 'Adventure & Mystery', 'Animal Stories', 'Family & Friends', 'Funny', 'Scary', 'Poems', 'Plays', 'Biographies', 'Science & Nature', 'Math', 'History', 'Place & Culture', 'Series', 'Award-winning', 'Read-Aloud Stories', 'Lifeskills', 'Activity Books', 'Audio Books'].each { |sc|
-    StoryCategory.create!(name: sc)
+    StoryCategory.create!(name: sc, translated_name: sc)
   }
 
   StoryPageTemplate.create!(name: 'sp_h_iL50_cR50', default: true, orientation: 'landscape', image_position: 'left',content_position: 'right', image_dimension: 50, content_dimension: 50)

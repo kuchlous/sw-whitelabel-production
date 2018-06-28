@@ -248,6 +248,7 @@ def getOrganization(uuid, token, origin)
     api_response = fetchOrganization(uuid, token, origin)
     obj = Organization.new(
       organization_name:    api_response[:organization_name],
+      translated_name:      api_response[:translated_name],
       organization_type:    api_response[:organization_type],
       country:              api_response[:country],
       city:                 api_response[:city],

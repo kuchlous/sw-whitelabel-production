@@ -75,7 +75,7 @@ require 'json'
 
 # Assumption: Language, Author, Copy Right Holder, StoryCategory, Illustration already exist with passed IDs
 def createCompleteStory(api_response, token, origin)
-  lang_obj = getLanguage(api_response[:language_uuid], token, origin)
+  lang_obj = getLanguage(api_response[:language_name], token, origin)
   story_category_objs = []
   api_response[:story_category_uuids].each {|uuid| story_category_objs << getStoryCategory(uuid, token, origin) }
 
@@ -142,11 +142,6 @@ def createCompleteStory(api_response, token, origin)
 end
 
 ################### FETCH FROM REMOTE SERVER #################
-def fetchPageTemplate(uuid, token, origin)
-  return {} if uuid.nil?
-  return fetchEntity("#{origin}/api/v0/page_template/#{uuid}?token=#{token}")
-end
-
 def fetchIllustrationCrop(uuid, token, origin)
   return {} if uuid.nil?
   return fetchEntity("#{origin}/api/v0/illustration_crop/#{uuid}?token=#{token}")
@@ -172,11 +167,6 @@ def fetchIllustrator(uuid, token, origin)
   return fetchEntity("#{origin}/api/v0/illustrator/#{uuid}?token=#{token}")
 end
 
-def fetchLanguage(uuid, token, origin)
-  return {} if uuid.nil?
-  return fetchEntity("#{origin}/api/v0/language/#{uuid}?token=#{token}")
-end
-
 def fetchStoryCategory(uuid, token, origin)
   return {} if uuid.nil?
   return fetchEntity("#{origin}/api/v0/story_category/#{uuid}?token=#{token}")
@@ -185,11 +175,6 @@ end
 def fetchUser(uuid, token, origin)
   return {} if uuid.nil?
   return fetchEntity("#{origin}/api/v0/user/#{uuid}?token=#{token}")
-end
-
-def fetchLanguageFont(uuid, token, origin)
-  return {} if uuid.nil?
-  return fetchEntity("#{origin}/api/v0/language_font/#{uuid}?token=#{token}")
 end
 
 def fetchOrganization(uuid, token, origin)
@@ -445,25 +430,11 @@ def getLanguageFont(script, token, origin)
   return lang_font_obj
 end
 
-def getLanguage(uuid, token, origin)
-  lang_obj = Language.find_by_uuid(uuid)
+def getLanguage(name, token, origin)
+  lang_obj = Language.find_by_name(name)
   if lang_obj.nil?
-    puts "fetching language with uuid => #{uuid}"                
-    api_response = fetchLanguage(uuid, token, origin)
-    lang_font_obj = getLanguageFont(api_response[:language_font_script], token, origin)
-    obj = Language.new(
-      :is_right_to_left    => api_response[:is_right_to_left],
-      :can_transliterate   => api_response[:can_transliterate],
-      :script              => api_response[:script],
-      :locale              => api_response[:locale],
-      :bilingual           => api_response[:bilingual],
-      :language_font_id    => lang_font_obj.id,
-      :level_band          => api_response[:level_band],
-      :uuid                => api_response[:uuid]
-    )
-    obj.name = api_response[:name]
-    obj.translated_name = api_response[:translated_name]
-    lang_obj = obj.tap(&:save)
+    puts "ERROR: language not present"
+    return nil
   end
   return lang_obj
 end

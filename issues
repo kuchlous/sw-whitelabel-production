@@ -1,5 +1,5 @@
+- pdf not styled properly - may be a wkhtmltopdf version issue.
 - Books upload using API
   - reindex after save
-  - Publisher creation
 - imageMagick fix and update Dockerfile in deploy
 - Simplify the documentation and scripts to not pass settings at multiple places

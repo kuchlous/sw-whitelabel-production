@@ -279,8 +279,9 @@ def getIllustrationStyle(uuid, token, origin)
     puts "fetching illustration style with uuid => #{uuid}"                
     api_response = fetchIllustrationStyle(uuid, token, origin)
     obj = IllustrationStyle.new(
-      name: api_response[:name],
-      uuid: api_response[:uuid]
+      name:             api_response[:name],
+      translated_name:  api_response[:translated_name],
+      uuid:             api_response[:uuid]
     )
     i_style_obj = obj.tap(&:save)
   end
@@ -293,8 +294,9 @@ def getIllustrationCategory(uuid, token, origin)
     puts "fetching illustration category with uuid => #{uuid}"                
     api_response = fetchIllustrationCategory(uuid, token, origin)
     obj = IllustrationCategory.new(
-      name: api_response[:name],
-      uuid: api_response[:uuid]
+      name:             api_response[:name],
+      translated_name:  api_response[:translated_name],
+      uuid:             api_response[:uuid]
     )
     i_category_obj = obj.tap(&:save)
   end
@@ -446,6 +448,7 @@ def getStoryCategory(uuid, token, origin)
     api_response = fetchStoryCategory(uuid, token, origin)
     obj = StoryCategory.new(
       :name           => api_response[:name],
+      :translated_name=> api_response[:translated_name],
       :private        => api_response[:private],
       :active_on_home => api_response[:active_on_home],
       :uuid           => api_response[:uuid]

@@ -1,4 +1,5 @@
-- pdf not styled properly - may be a wkhtmltopdf version issue.
+- Some illustrators do not have users attached to them.
+- Signup emails not going
 - Books upload using API
   - reindex after save
 - imageMagick fix and update Dockerfile in deploy

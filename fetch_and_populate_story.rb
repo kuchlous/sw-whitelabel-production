@@ -365,7 +365,6 @@ def getIllustration(uuid, token, origin)
       :flaggings_count          => api_response[:flaggings_count],
       :copy_right_year          => api_response[:copy_right_year],
       :image_meta               => api_response[:image_meta],
-      :cached_votes_total       => api_response[:cached_votes_total],         
       :reads                    => api_response[:reads],         
       :is_pulled_down           => api_response[:is_pulled_down],         
       :copy_right_holder_id     => api_response[:copy_right_holder_id],

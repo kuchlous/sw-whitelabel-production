@@ -97,7 +97,7 @@ class Api::V1::ProfileController < Api::V1::ApplicationController
                       organizations: [@org.organization_name],
                       sort: {published_at: {order: "desc"}},
                       cache: "false"}, page: page, per_page: per_page}
-    nObj = Querysearch::Books.new(params, nil, false)
+    nObj = Search::Books.new(params, nil, false)
     @new_arrivals = nObj.search
     eObj = Search::Books.new(params, nil, false)
     @editor_recommendations = eObj.editor_recommended_stories

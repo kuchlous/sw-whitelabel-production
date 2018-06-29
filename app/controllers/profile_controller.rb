@@ -163,9 +163,44 @@ class ProfileController < ApplicationController
     user.flag(illustration, params[:reason])
   end
 
+  def user_org_details
+    @current_tab = "organization_details"
+    @org = Organization.find_by_id(params[:org_id])
+    unless current_user.is_admin(@org)
+      flash[:error] = "You are not authorised to do this."
+      redirect_to root_path
+    end
+  end
+
+  def org_logo
+    @current_tab = 'details'
+    @org = Organization.find_by_id(params[:org_id])
+    @org.update_attributes(:logo => params[:org][:logo])
+  end
+
   def profile_image
     @current_tab = 'details'
     current_user.update_attributes(:profile_image => params[:user][:profile_image])
+  end
+
+  def edit_org
+    @current_tab = 'details'
+    @org = Organization.find_by_id(params[:org_id])
+    @org.update_attributes(:organization_name => params[:organization][:organization_name],:country => params[:organization][:country],:email => params[:organization][:email], :website => params[:organization][:website],
+                            :description => params[:organization][:description],:facebook_url => params[:organization][:facebook_url],
+                            :rss_url => params[:organization][:rss_url], :twitter_url => params[:organization][:twitter_url],
+                            :youtube_url => params[:organization][:youtube_url], :number_of_classrooms => params[:organization][:number_of_classrooms],
+                            :children_impacted => params[:organization][:children_impacted]) || flash[:errors] = @org.errors.messages
+    flash[:errors]
+    redirect_to user_org_details_path(:org_id => @org.id)
+    flash[:notice] = "Your changes have been saved."
+  end
+
+  def get_pub_logo_path
+    organization_id = params[:organization_id]
+    organization = !organization_id.to_s.empty? ? Organization.find(organization_id) : ""
+    logo_path = (organization!="") ? (organization.logo.present? ? organization.logo.url(:original) : "") : "#{host_url}/assets/publisher_logos/community.jpg"
+    render json: {"logo_path" => logo_path}
   end
 
   private

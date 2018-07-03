@@ -85,7 +85,7 @@ class List < ActiveRecord::Base
   def cover_image(story)
     {
       :aspectRatio => 224.0/224.0,
-      :cropCoords => get_cover_image_crop_coords(story),
+      :cropCoords => story.get_cover_image_crop_coords,
       :sizes => [:size1, :size2, :size3, :size4, :size5, :size6, :size7].map{ |size| 
                                     { :height => get_cover_image_height(story, size),
                                       :width => get_cover_image_width(story, size),

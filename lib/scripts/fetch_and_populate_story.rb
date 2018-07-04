@@ -105,6 +105,9 @@ def createCompleteStory(api_response, token, origin)
     uuid:                 api_response[:uuid]
   )
 
+  puts "Will set recommended flag of the story if it is a publisher one.."
+  story.recommended_status = :recommended if !org_obj.nil?
+
   begin
     story.save!
   rescue => exception

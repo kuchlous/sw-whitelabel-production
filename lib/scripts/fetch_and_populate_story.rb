@@ -313,10 +313,11 @@ def getUser(uuid, token, origin)
     puts "fetching user with uuid => #{uuid}"                
     api_response = fetchUser(uuid, token, origin)
     obj = User.new(
-      :name     => api_response[:name],
-      :email    => "#{SecureRandom.hex}@gmail.com",
-      :password => "#{SecureRandom.hex}",      
-      :uuid     => api_response[:uuid]      
+      :first_name   => api_response[:first_name],
+      :last_name    => api_response[:last_name],
+      :email        => "#{SecureRandom.hex}@gmail.com",
+      :password     => "#{SecureRandom.hex}",      
+      :uuid         => api_response[:uuid]      
     )
     user_obj = obj.tap(&:save)
   end
